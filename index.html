@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload & customize · Wajdan Quran Certificate</title>
+    <!-- html2canvas for export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #2b1a44;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .generator-container {
+            max-width: 1200px;
+            width: 100%;
+            background: #faf2e4;
+            border-radius: 2rem;
+            box-shadow: 0 30px 40px rgba(60, 20, 60, 0.6);
+            padding: 2rem;
+            border: 1px solid #cfcdc9;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: #341f50;
+            border-left: 8px solid #b3864a;
+            padding-left: 1.5rem;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+        }
+
+        .sub {
+            color: #623f7a;
+            margin-bottom: 2rem;
+            padding-left: 2rem;
+            font-style: italic;
+        }
+
+        /* upload & input row */
+        .upload-area {
+            background: #efe1cf;
+            border-radius: 2rem;
+            padding: 1.8rem 2rem;
+            margin-bottom: 2rem;
+            border: 1px dashed #a98154;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .file-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem 2rem;
+        }
+
+        .file-label {
+            background: #3d2a5c;
+            color: #fbeac2;
+            padding: 0.8rem 2rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+            border: 1px solid #bb9d6c;
+            box-shadow: 0 4px 8px #301f44;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-label:hover {
+            background: #553a7a;
+            transform: scale(1.02);
+        }
+
+        .file-label input {
+            display: none;
+        }
+
+        .file-name {
+            color: #2f1c3f;
+            font-weight: 500;
+            background: #f9eedb;
+            padding: 0.5rem 1.2rem;
+            border-radius: 30px;
+            border: 1px solid #b18b57;
+        }
+
+        /* three fields */
+        .fields-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin: 1.5rem 0 1.2rem;
+        }
+
+        .field {
+            flex: 1 1 180px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3d265b;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 0.3rem;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 0.75rem 1.2rem;
+            background: #fefcf7;
+            border: 2px solid #b79360;
+            border-radius: 40px;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.15s;
+        }
+
+        .field input:focus {
+            border-color: #835fa8;
+            box-shadow: 0 0 0 3px #cbb2e6;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            border: none;
+            background: #7b549e;
+            color: white;
+            font-weight: 700;
+            padding: 0.8rem 2.2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.15s;
+            box-shadow: 0 6px 14px #412e5a;
+            border: 1px solid #dbb275;
+        }
+
+        .btn-light {
+            background: #b48b4b;
+            color: #1b1027;
+        }
+
+        .btn:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        /* certificate preview panel */
+        .preview-panel {
+            background: #36235066;
+            border-radius: 2.5rem;
+            padding: 2rem 1.5rem;
+            margin: 2rem 0 1.5rem;
+            display: flex;
+            justify-content: center;
+            border: 1px solid #c7a66d;
+        }
+
+        .certificate-wrapper {
+            position: relative;
+            width: 900px;
+            max-width: 100%;
+            border-radius: 40px;
+            overflow: hidden;
+            box-shadow: 0 25px 35px -8px black;
+        }
+
+        /* background image (user uploaded) */
+        .cert-bg {
+            display: block;
+            width: 100%;
+            height: auto;
+            visibility: hidden; /* hide actual img, we use background-image on parent */
+        }
+
+        .cert-canvas {
+            position: relative;
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: #fcf3e0; /* fallback */
+        }
+
+        /* text overlays – positions based on typical certificate layout (can be adjusted) */
+        .overlay-text {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            color: #2c1b38;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(255,255,200,0.6);
+            pointer-events: none; /* so clicks go through to background (if any) */
+        }
+
+        .overlay-name {
+            top: 46%;
+            font-size: 3.5rem;
+            font-family: 'Brush Script MT', cursive, serif;
+            color: #311d4a;
+            font-weight: 400;
+            transform: translateY(-50%);
+            padding: 0 2rem;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        .overlay-para {
+            top: 58%;
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #3d2b1d;
+            padding: 0 3rem;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .overlay-date {
+            top: 72%;
+            font-size: 2rem;
+            font-weight: 600;
+            color: #2d1c42;
+            font-family: 'Georgia', serif;
+            word-break: break-word;
+            padding: 0 2rem;
+        }
+
+        /* signature (static but we also overlay, though it's on the image) */
+        /* we keep it because image may not have text; we overlay everything */
+        .overlay-signature {
+            top: 84%;
+            font-size: 2.2rem;
+            font-family: 'Brush Script MT', cursive;
+            color: #2c1440;
+        }
+
+        .overlay-signature-title {
+            top: 88%;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #4a2f1f;
+        }
+
+        .overlay-signature-sub {
+            top: 91%;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #5c4075;
+        }
+
+        /* note: you can tweak these percentages if the overlay doesn't match your image */
+        .adjust-note {
+            background: #efdbb0;
+            border-radius: 2rem;
+            padding: 0.6rem 1.5rem;
+            margin-top: 0.8rem;
+            font-size: 0.9rem;
+            color: #2a1b3a;
+            text-align: center;
+            border: 1px solid #c2a26b;
+        }
+
+        .footnote {
+            margin-top: 1.5rem;
+            text-align: center;
+            color: #ebdbbc;
+            border-top: 1px dashed #9473b3;
+            padding-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+<div class="generator-container">
+    <h1>🕌 Wajdan Quran Academy</h1>
+    <div class="sub">upload your certificate background · overlay exact text</div>
+
+    <!-- Image upload area -->
+    <div class="upload-area">
+        <div class="file-row">
+            <label class="file-label">
+                📂 upload certificate image (PNG/JPG)
+                <input type="file" id="imageUpload" accept="image/png, image/jpeg, image/jpg">
+            </label>
+            <span class="file-name" id="uploadStatus">no file chosen</span>
+        </div>
+        <div class="fields-grid">
+            <div class="field">
+                <label>👤 student name</label>
+                <input type="text" id="studentName" value="Aisha Khan" placeholder="full name">
+            </div>
+            <div class="field">
+                <label>📖 para number</label>
+                <input type="text" id="paraNumber" value="30" placeholder="e.g. 30">
+            </div>
+            <div class="field">
+                <label>📅 completion date</label>
+                <input type="text" id="date" value="March 13, 2026" placeholder="February 14, 2025">
+            </div>
+        </div>
+        <div class="action-btns">
+            <button class="btn" id="updateOverlayBtn">⟳ update text overlay</button>
+            <button class="btn btn-light" id="downloadBtn">⬇ download combined certificate</button>
+        </div>
+    </div>
+
+    <!-- Certificate preview with background and overlays -->
+    <div class="preview-panel">
+        <div class="certificate-wrapper" id="certificateWrapper">
+            <!-- this div holds the background image via inline style and contains overlays -->
+            <div id="certificateCanvas" class="cert-canvas" style="background-image: none; min-height: 300px;">
+                <!-- We keep an invisible img to maintain aspect ratio and load dimensions -->
+                <img id="bgImageElem" class="cert-bg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='637' viewBox='0 0 900 637'%3E%3Crect width='900' height='637' fill='%23f3e5ca'/%3E%3Ctext x='50%25' y='20%25' text-anchor='middle' fill='%23987654' font-size='30' font-family='Georgia'%3EUpload your certificate%3C/text%3E%3C/svg%3E"
+                     alt="certificate background" style="visibility: hidden; width: 100%; height: auto;">
+                
+                <!-- overlay texts (positioned absolutely relative to the canvas) -->
+                <div class="overlay-text overlay-name" id="overlayName">Aisha Khan</div>
+                <div class="overlay-text overlay-para" id="overlayPara">In recognition of successfully completing the recitation and memorization of Para <span id="paraSpan">30</span>. May Allah (SWT) bless this knowledge and accept your efforts.</div>
+                <div class="overlay-text overlay-date" id="overlayDate">Completed on: March 13, 2026</div>
+                <div class="overlay-text overlay-signature" id="overlaySignature">zainab</div>
+                <div class="overlay-text overlay-signature-title" id="overlaySigTitle">ZAINAB JAVED</div>
+                <div class="overlay-text overlay-signature-sub" id="overlaySigSub">HEAD of Wajdan Quran Academy</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- fine‑tuning note -->
+    <div class="adjust-note">
+        ⚡ If text positions don’t exactly match your uploaded image, you can adjust the percentage values in the CSS (see <code>.overlay-name</code> etc.) or contact for custom fit.
+    </div>
+    <div class="footnote">
+        ✦ upload your Purple Gold certificate → fill details → update → download ✦
+    </div>
+</div>
+
+<script>
+    (function() {
+        // DOM elements
+        const imageUpload = document.getElementById('imageUpload');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const bgImageElem = document.getElementById('bgImageElem');
+        const certificateCanvas = document.getElementById('certificateCanvas');
+        const studentName = document.getElementById('studentName');
+        const paraNumber = document.getElementById('paraNumber');
+        const dateInput = document.getElementById('date');
+        const paraSpan = document.getElementById('paraSpan');
+        const overlayName = document.getElementById('overlayName');
+        const overlayPara = document.getElementById('overlayPara');
+        const overlayDate = document.getElementById('overlayDate');
+        // signature parts are static but we keep them for completeness; they can be dynamic if needed
+        const updateBtn = document.getElementById('updateOverlayBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const wrapper = document.getElementById('certificateWrapper');
+
+        // Function to update overlay texts from inputs
+        function updateTexts() {
+            let nameVal = studentName.value.trim();
+            overlayName.innerText = nameVal || '______';
+
+            let paraVal = paraNumber.value.trim();
+            paraSpan.innerText = paraVal || '______';
+
+            let dateVal = dateInput.value.trim();
+            overlayDate.innerText = dateVal ? `Completed on: ${dateVal}` : 'Completed on: ______';
+        }
+
+        // Initial update
+        updateTexts();
+
+        // Update button
+        updateBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            updateTexts();
+        });
+
+        // Handle image upload
+        imageUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                uploadStatus.innerText = file.name;
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    // set background image of canvas div
+                    certificateCanvas.style.backgroundImage = `url('${ev.target.result}')`;
+                    // also update hidden img src to maintain aspect ratio (so wrapper keeps dimensions)
+                    bgImageElem.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                uploadStatus.innerText = 'no file chosen';
+                certificateCanvas.style.backgroundImage = 'none';
+                bgImageElem.src = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'900\' height=\'637\' viewBox=\'0 0 900 637\'%3E%3Crect width=\'900\' height=\'637\' fill=\'%23f3e5ca\'/%3E%3Ctext x=\'50%25\' y=\'20%25\' text-anchor=\'middle\' fill=\'%23987654\' font-size=\'30\' font-family=\'Georgia\'%3EUpload your certificate%3C/text%3E%3C/svg%3E';
+            }
+        });
+
+        // Download the combined certificate (background + overlays)
+        downloadBtn.addEventListener('click', function() {
+            // Ensure latest text
+            updateTexts();
+
+            // Use html2canvas on the certificateCanvas (which has background and overlays)
+            html2canvas(certificateCanvas, {
+                scale: 2.5,
+                backgroundColor: null,   // transparent, we want background image
+                allowTaint: true,
+                useCORS: true,
+                logging: false,
+                windowWidth: certificateCanvas.scrollWidth
+            }).then((canvas) => {
+                // Generate filename from student name
+                let student = studentName.value.trim() || 'recipient';
+                const safeName = student.replace(/[^a-z0-9]/gi, '_').substring(0, 30);
+                const fileName = `wajdan_cert_${safeName}.png`;
+
+                const link = document.createElement('a');
+                link.download = fileName;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }).catch((err) => {
+                alert('Download failed. Please try again or use screenshot.\n' + err);
+            });
+        });
+
+        // optional: pressing Enter in inputs triggers update
+        [studentName, paraNumber, dateInput].forEach(inp => {
+            inp.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    updateBtn.click();
+                }
+            });
+        });
+    })();
+</script>
+
+<!-- note: the overlay positions are percentage-based. if your uploaded image has different proportions,
+     you may need to tweak the `top` values in .overlay-* classes. they are set to roughly match the described layout:
+     name at 46%, para block at 58%, date at 72%, signature at 84%, etc. -->
+</body>
+</html>
